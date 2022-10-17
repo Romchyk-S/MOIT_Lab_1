@@ -11,6 +11,8 @@ import sklearn.tree as skt
 
 import numpy as np
 
+import sklearn.preprocessing as skp
+
 import sklearn.model_selection as skms
 
 import sklearn.linear_model as sklm
@@ -39,11 +41,15 @@ def model_fitting(model, kf, X, Y):
 
         Y_test = Y[test]
 
-        X_train, X_test, Y_train, Y_test = skms.train_test_split(X, Y, random_state = 3)
+        # X_train, X_test, Y_train, Y_test = skms.train_test_split(X, Y, random_state = 3)
 
         start = tm.time()
 
         model.fit(X_train, Y_train)
+
+        print(model.coef_)
+
+        # coefficients = pd.concat([pd.DataFrame(X.columns),pd.DataFrame(np.transpose(model.coef_))], axis = 1)
 
         print(f"Час навчання {tm.time()-start}")
 
@@ -80,9 +86,20 @@ Y = dataset['Rainfall'].values
 
 kf = skms.KFold(n_splits = 5, shuffle = True)
 
+# model = sklm.LinearRegression()
+
+# model_fitting(model, kf, X, Y)
+
+
+
+
+poly = skp.PolynomialFeatures(degree = 2, include_bias = False)
+
+poly_features = poly.fit_transform(X.reshape(-1, 1))
+
 model = sklm.LinearRegression()
 
-model_fitting(model, kf, X, Y)
+model_fitting(model, kf, poly_features, Y)
 
 
 
