@@ -37,6 +37,16 @@ def model_fitting(model, kf, X, Y):
 
         X_test = X[test]
 
+        # print(test)
+
+        # print(train)
+
+        # print(X)
+
+        # print(X.size)
+
+        # print(Y.size)
+
         Y_train = Y[train]
 
         Y_test = Y[test]
@@ -80,22 +90,35 @@ dataset = dataset.dropna()
 
 X = dataset[['MinTemp', 'MaxTemp', 'Evaporation', 'Sunshine']].values
 
+X = dataset[['MinTemp', 'MaxTemp']].values
+
 Y = dataset['Rainfall'].values
 
 
 
 kf = skms.KFold(n_splits = 5, shuffle = True)
 
-# model = sklm.LinearRegression()
+model = sklm.LinearRegression()
 
-# model_fitting(model, kf, X, Y)
+model_fitting(model, kf, X, Y)
 
 
+# print(X.shape)
 
+# print()
 
 poly = skp.PolynomialFeatures(degree = 2, include_bias = False)
 
-poly_features = poly.fit_transform(X.reshape(-1, 1))
+poly_features = poly.fit_transform(X)
+
+
+# print(poly_features[0])
+
+# print(poly_features[0].shape)
+
+# print(poly_features.shape)
+
+# print()
 
 model = sklm.LinearRegression()
 
