@@ -17,11 +17,13 @@ import sklearn.model_selection as skms
 
 import sklearn.linear_model as sklm
 
-# import sklearn.metrics as skm
+import sklearn.metrics as skm
 
 import matplotlib.pyplot as plt
 
 import time as tm
+
+import seaborn as sns
 
 
 print()
@@ -33,51 +35,37 @@ def model_fitting(model, kf, X, Y):
 
     for train, test in kf.split(X):
 
-        X_train = X[train]
+        X_train, Y_train = X[train], Y[train]
 
-        X_test = X[test]
-
-        # print(test)
-
-        # print(train)
-
-        # print(X)
-
-        # print(X.size)
-
-        # print(Y.size)
-
-        Y_train = Y[train]
-
-        Y_test = Y[test]
-
-        # X_train, X_test, Y_train, Y_test = skms.train_test_split(X, Y, random_state = 3)
+        X_test, Y_test = X[test], Y[test]
 
         start = tm.time()
 
         model.fit(X_train, Y_train)
 
+        time = tm.time()-start
+
         print(model.coef_)
 
-        # coefficients = pd.concat([pd.DataFrame(X.columns),pd.DataFrame(np.transpose(model.coef_))], axis = 1)
+        print(f"Час навчання {time}")
 
-        print(f"Час навчання {tm.time()-start}")
+        prediction = model.predict(X_test)
+
+        model_performance = model.score(X_test, Y_test)
+
+        print(model_performance)
+
+        model_performance = skm.mean_squared_error(Y_test, prediction)
+
+        print(model_performance)
 
         print()
 
-        scores.append(model.score(X_test, Y_test))
+        scores.append(model_performance)
 
-        # prediction = model.predict(X_test)
+    print(f"Середня точність за {kf.n_splits} поділів: {np.mean(scores)}")
 
-        # fig1 = plt.figure()
-
-        # ax1 = fig1.subplots()
-
-        # ax1.scatter(X_test.T[0], Y_test)
-
-        # ax1.scatter(X_test.T[0], prediction)
-
-    print(np.mean(scores))
+    # print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
 
     print()
 
@@ -88,42 +76,55 @@ dataset = pd.read_csv('weather.csv')
 dataset = dataset.dropna()
 
 
-X = dataset[['MinTemp', 'MaxTemp', 'Evaporation', 'Sunshine']].values
+# X = dataset[['MinTemp', 'MaxTemp', 'Evaporation', 'Sunshine']].values
 
 X = dataset[['MinTemp', 'MaxTemp']].values
+
+# X = dataset[['MinTemp', 'MaxTemp', 'Evaporation']].values
 
 Y = dataset['Rainfall'].values
 
 
+corr = dataset.corr()
 
-kf = skms.KFold(n_splits = 5, shuffle = True)
+print(dict(corr['Rainfall']))
 
-model = sklm.LinearRegression()
+corr.style.background_gradient(cmap='coolwarm')
 
-model_fitting(model, kf, X, Y)
-
-
-# print(X.shape)
-
-# print()
-
-poly = skp.PolynomialFeatures(degree = 2, include_bias = False)
-
-poly_features = poly.fit_transform(X)
+sns.heatmap(corr, annot = True)
 
 
-# print(poly_features[0])
 
-# print(poly_features[0].shape)
+# kf = skms.KFold(n_splits = 5, shuffle = True)
 
-# print(poly_features.shape)
+# print("Лінійна регресія")
 
-# print()
+# model = sklm.LinearRegression()
 
-model = sklm.LinearRegression()
+# model_fitting(model, kf, X, Y)
 
-model_fitting(model, kf, poly_features, Y)
 
+# print("Квадратурна регресія")
+
+# poly = skp.PolynomialFeatures(degree = 2, include_bias = False)
+
+# poly_features = poly.fit_transform(X)
+
+
+# model = sklm.LinearRegression()
+
+# model_fitting(model, kf, poly_features, Y)
+
+
+# print("Дерево прийняття рішень")
+
+# param_grid = {"max_depth": [5, 15, 25], "min_samples_leaf": [1, 3], "max_leaf_nodes": [10, 20, 35, 50]}
+
+# model = skt.DecisionTreeClassifier()
+
+# model = skms.GridSearchCV(model, param_grid, scoring = "f1", cv = 5)
+
+# model_fitting(model, kf, X, Y)
 
 
 # prediction = model.predict(X_test);
