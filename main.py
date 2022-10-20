@@ -9,111 +9,72 @@ import pandas as pd
 
 import sklearn.tree as skt
 
-import numpy as np
-
-import sklearn.preprocessing as skp
-
 import sklearn.model_selection as skms
-
-import sklearn.linear_model as sklm
-
-import sklearn.metrics as skm
 
 import matplotlib.pyplot as plt
 
-import time as tm
+import build_model as bm
+
+
 
 import seaborn as sns
+
+# import tkinter as tk
 
 
 print()
 
+var_to_predict = 'Rainfall'
 
-def model_fitting(model, kf, X, Y):
+# var_to_predict = 'Sunshine'
 
-    scores = []
+# var_to_predict = 'MinTemp'
 
-    for train, test in kf.split(X):
 
-        X_train, Y_train = X[train], Y[train]
+corr_threshold = [0.2, 1]
 
-        X_test, Y_test = X[test], Y[test]
-
-        start = tm.time()
-
-        model.fit(X_train, Y_train)
-
-        time = tm.time()-start
-
-        print(model.coef_)
-
-        print(f"Час навчання {time}")
-
-        prediction = model.predict(X_test)
-
-        model_performance = model.score(X_test, Y_test)
-
-        print(model_performance)
-
-        model_performance = skm.mean_squared_error(Y_test, prediction)
-
-        print(model_performance)
-
-        print()
-
-        scores.append(model_performance)
-
-    print(f"Середня точність за {kf.n_splits} поділів: {np.mean(scores)}")
-
-    # print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
-
-    print()
-
+splits_number = 5
 
 
 dataset = pd.read_csv('weather.csv')
 
 dataset = dataset.dropna()
 
-
-# X = dataset[['MinTemp', 'MaxTemp', 'Evaporation', 'Sunshine']].values
-
-X = dataset[['MinTemp', 'MaxTemp']].values
-
-# X = dataset[['MinTemp', 'MaxTemp', 'Evaporation']].values
-
-Y = dataset['Rainfall'].values
-
-
 corr = dataset.corr()
 
-print(dict(corr['Rainfall']))
+var_correlation = dict(corr[var_to_predict])
 
-corr.style.background_gradient(cmap='coolwarm')
+# best_var_correlation = {k: v for k, v in var_correlation.items() if v < corr_threshold[1] and v > corr_threshold[0]}
+
+best_var_correlation = {k: v for k, v in var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
+
+print(best_var_correlation)
+
+print()
+
+
+
+corr.style.background_gradient(cmap = 'coolwarm')
 
 sns.heatmap(corr, annot = True)
 
 
+X = dataset[best_var_correlation.keys()].values
 
-# kf = skms.KFold(n_splits = 5, shuffle = True)
-
-# print("Лінійна регресія")
-
-# model = sklm.LinearRegression()
-
-# model_fitting(model, kf, X, Y)
+Y = dataset[var_to_predict].values
 
 
-# print("Квадратурна регресія")
 
-# poly = skp.PolynomialFeatures(degree = 2, include_bias = False)
-
-# poly_features = poly.fit_transform(X)
+kf = skms.KFold(n_splits = splits_number, shuffle = True)
 
 
-# model = sklm.LinearRegression()
+print("Лінійна регресія")
 
-# model_fitting(model, kf, poly_features, Y)
+bm.build_model(kf, X, Y, 1)
+
+print("Квадратурна регресія")
+
+bm.build_model(kf, X, Y, 2)
 
 
 # print("Дерево прийняття рішень")
@@ -125,15 +86,4 @@ sns.heatmap(corr, annot = True)
 # model = skms.GridSearchCV(model, param_grid, scoring = "f1", cv = 5)
 
 # model_fitting(model, kf, X, Y)
-
-
-# prediction = model.predict(X_test);
-
-# precision = skm.precision_score(Y_test, prediction)
-
-# recall = skm.recall_score(Y_test, prediction)
-
-# print(f"Влучність (precision): {precision*100}%")
-
-# print(f"Відкликання/чутливість (recall/sensitivity): {recall*100}%")
 
