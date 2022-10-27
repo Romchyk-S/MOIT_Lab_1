@@ -7,29 +7,16 @@ Created on Fri Oct 14 11:26:16 2022
 
 import pandas as pd
 
-import sklearn.tree as skt
+# import matplotlib.pyplot as plt
 
-import sklearn.model_selection as skms
+# import seaborn as sns
 
-import matplotlib.pyplot as plt
+import numpy as np
 
-import build_model as bm
-
-
-
-import seaborn as sns
-
-# import tkinter as tk
+import graphic_interface as gi
 
 
 print()
-
-var_to_predict = 'Rainfall'
-
-# var_to_predict = 'Sunshine'
-
-# var_to_predict = 'MinTemp'
-
 
 corr_threshold = [0.2, 1]
 
@@ -40,50 +27,18 @@ dataset = pd.read_csv('weather.csv')
 
 dataset = dataset.dropna()
 
-corr = dataset.corr()
+# corr.style.background_gradient(cmap = 'coolwarm')
 
-var_correlation = dict(corr[var_to_predict])
-
-# best_var_correlation = {k: v for k, v in var_correlation.items() if v < corr_threshold[1] and v > corr_threshold[0]}
-
-best_var_correlation = {k: v for k, v in var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
-
-print(best_var_correlation)
-
-print()
+# sns.heatmap(corr, annot = True)
 
 
 
-corr.style.background_gradient(cmap = 'coolwarm')
+variables = dataset.columns
 
-sns.heatmap(corr, annot = True)
+continuous_vars = [var for var in variables if dataset.dtypes[var] != "object"]
 
-
-X = dataset[best_var_correlation.keys()].values
-
-Y = dataset[var_to_predict].values
+discrete_vars = np.setdiff1d(variables, continuous_vars)
 
 
-
-kf = skms.KFold(n_splits = splits_number, shuffle = True)
-
-
-print("Лінійна регресія")
-
-bm.build_model(kf, X, Y, 1)
-
-print("Квадратурна регресія")
-
-bm.build_model(kf, X, Y, 2)
-
-
-# print("Дерево прийняття рішень")
-
-# param_grid = {"max_depth": [5, 15, 25], "min_samples_leaf": [1, 3], "max_leaf_nodes": [10, 20, 35, 50]}
-
-# model = skt.DecisionTreeClassifier()
-
-# model = skms.GridSearchCV(model, param_grid, scoring = "f1", cv = 5)
-
-# model_fitting(model, kf, X, Y)
+gi.main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_number)
 
