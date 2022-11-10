@@ -12,7 +12,7 @@ import sklearn.model_selection as skms
 import build_model as bm
 
 
-def main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_number):
+def main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_number, max_regression_pow, tree_parameters):
 
     root = tk.Tk()
 
@@ -20,15 +20,14 @@ def main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_nu
 
     root.geometry('700x500')
 
-    choose_continuous_var(root, dataset, continuous_vars, corr_threshold, splits_number)
+    choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_regression_pow, splits_number)
 
-    choose_discrete_var(root, discrete_vars)
+    choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_number, tree_parameters)
 
     root.mainloop()
 
 
-
-def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, splits_number):
+def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_regression_pow, splits_number):
 
     label = tk.Label(root, text="Оберіть неперервну змінну: ")
 
@@ -66,16 +65,18 @@ def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, splits
 
 
         kf = skms.KFold(n_splits = splits_number, shuffle = True)
+        
+        
+        
+        regression_powers = [i for i in range(1, max_regression_pow+1)]
+        
+        regression_names = {1: "Лінійна регресія", 2: "Квадратурна регресія", 3: "Кубічна регресія"}
+        
+        for rp in regression_powers:
 
+            print(regression_names.get(rp, f"Регресія степеня {rp}"))
 
-        print("Лінійна регресія")
-
-        bm.build_regression_model(kf, X, Y, 1)
-
-        print("Квадратурна регресія")
-
-        bm.build_regression_model(kf, X, Y, 2)
-
+            bm.build_regression_model(kf, X, Y, rp)
 
 
 
@@ -83,7 +84,7 @@ def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, splits
 
     submit_button.pack()
 
-def choose_discrete_var(root, discrete_vars):
+def choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_number, tree_parameters):
 
     label_1 = tk.Label(root, text="Оберіть дискретну змінну: ")
 
@@ -103,36 +104,31 @@ def choose_discrete_var(root, discrete_vars):
         print(f"Обрано змінну {binary_var_to_predict}")
 
 
-        # Як обирати змінні для X?
+        corr = dataset.corr()
 
+        binary_var_correlation = dict(corr[binary_var_to_predict+"_int"])
 
-        # corr = dataset.corr()
+        best_binary_var_correlation = {k: v for k, v in binary_var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
 
-        # binary_var_correlation = dict(corr[binary_var_to_predict])
+        print(f"Обрана змінна найкраще корелює зі змінними: {best_binary_var_correlation}")
 
-        # best_binary_var_correlation = {k: v for k, v in binary_var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
-
-        # print(best_binary_var_correlation)
-
-        # print()
+        print()
 
 
 
-        # X = dataset[best_binary_var_correlation.keys()].values
 
-        # # Y = dataset[var_to_predict].values
+        X = dataset[best_binary_var_correlation.keys()].values
 
-        # dataset[binary_var_to_predict] = dataset[binary_var_to_predict] == "Yes"
-
-        # Y1 = dataset[binary_var_to_predict].values
+        Y = dataset[binary_var_to_predict+"_int"].values
 
 
-        # kf = skms.KFold(n_splits = splits_number, shuffle = True)
+        kf = skms.KFold(n_splits = splits_number, shuffle = True)
 
-
-        # print("Дерево прийняття рішень")
-
-        # bm.build_decision_tree_model(kf, X, Y1)
+        print("Дерево прийняття рішень")
+        
+        bm.build_decision_tree_model(kf, X, Y, list(best_binary_var_correlation.keys()), tree_parameters)
+        
+        
 
     submit_button = tk.Button(root, text='Обрати змінну', command = lambda: get_discr_var())
     submit_button.pack()
