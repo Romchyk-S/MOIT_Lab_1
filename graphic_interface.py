@@ -136,7 +136,7 @@ def choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_num
 
         print("Дерево прийняття рішень")
         
-        bm.build_decision_tree_model(kf, X, Y, list(best_binary_var_correlation.keys()), tree_parameters)
+        bm.build_decision_tree_model(kf, X, Y, list(best_binary_var_correlation), tree_parameters)
         
         
 

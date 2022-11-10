@@ -34,11 +34,11 @@ def train_evaluate_model(model, X, Y, train, test, ind):
 
     X_test, Y_test = X[test], Y[test]
 
-    start = tm.time()
+    start = tm.perf_counter()
 
     model.fit(X_train, Y_train)
 
-    time = tm.time()-start
+    time = tm.perf_counter()-start
 
     print(f"Цикл {ind}: Час навчання {time}")
 
