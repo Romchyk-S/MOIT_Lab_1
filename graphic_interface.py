@@ -24,7 +24,18 @@ def main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_nu
 
     choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_number, tree_parameters)
 
+    end_window(root)    
+
     root.mainloop()
+
+def end_window(root):
+
+     def button():
+
+         root.destroy()
+
+     submit_button = tk.Button(root, text = 'Завершити роботу', command = lambda: button())
+     submit_button.pack()
 
 
 def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_regression_pow, splits_number):
@@ -72,12 +83,13 @@ def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_re
         
         regression_names = {1: "Лінійна регресія", 2: "Квадратурна регресія", 3: "Кубічна регресія"}
         
+        
+        
         for rp in regression_powers:
 
             print(regression_names.get(rp, f"Регресія степеня {rp}"))
 
             bm.build_regression_model(kf, X, Y, rp)
-
 
 
     submit_button = tk.Button(root, text='Обрати змінну', command = lambda: get_cont_var())
@@ -113,8 +125,6 @@ def choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_num
         print(f"Обрана змінна найкраще корелює зі змінними: {best_binary_var_correlation}")
 
         print()
-
-
 
 
         X = dataset[best_binary_var_correlation.keys()].values

@@ -28,7 +28,7 @@ os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
 
 
 
-def train_evaluate_model(model, X, Y, train, test):
+def train_evaluate_model(model, X, Y, train, test, ind):
 
     X_train, Y_train = X[train], Y[train]
 
@@ -40,7 +40,7 @@ def train_evaluate_model(model, X, Y, train, test):
 
     time = tm.time()-start
 
-    print(f"Час навчання {time}")
+    print(f"Цикл {ind}: Час навчання {time}")
 
     prediction = model.predict(X_test)
 
@@ -57,12 +57,14 @@ def build_regression_model(kf, X, Y, regression_degree):
     scores = []
 
     errs = []
+    
+    i = 0
 
     for train, test in kf.split(X):
 
         model = sklm.LinearRegression()
 
-        X_test, Y_test, prediction = train_evaluate_model(model, X, Y, train, test)
+        X_test, Y_test, prediction = train_evaluate_model(model, X, Y, train, test, i)
 
         model_performance = model.score(X_test, Y_test)
 
@@ -71,6 +73,8 @@ def build_regression_model(kf, X, Y, regression_degree):
         scores.append(model_performance)
 
         errs.append(error)
+        
+        i += 1
 
     # print(model.coef_)
 
@@ -89,14 +93,16 @@ def build_decision_tree_model(kf, X, Y, features, tree_parameters):
     precisions = []
 
     recalls = []
+    
+    i = 0
 
-    for train, test in kf.split(X):
+    for train, test in kf.split(X):    
 
         model = skt.DecisionTreeClassifier(max_depth=tree_parameters.get('max_depth', 5), min_samples_leaf=tree_parameters.get('min_samples_leaf', 2), max_leaf_nodes=tree_parameters.get('max_leaf_nodes', 10))
 
         # gs = skms.GridSearchCV(model, param_grid, scoring = "f1", cv = 5)
 
-        X_test, Y_test, prediction = train_evaluate_model(model, X, Y, train, test)
+        X_test, Y_test, prediction = train_evaluate_model(model, X, Y, train, test, i)
 
         accuracy = skm.accuracy_score(Y_test, prediction)
 
@@ -109,6 +115,8 @@ def build_decision_tree_model(kf, X, Y, features, tree_parameters):
         precisions.append(precision)
 
         recalls.append(recall)
+        
+        i += 1
 
     print()
 

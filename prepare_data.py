@@ -9,6 +9,7 @@ import pandas as pd
 
 import numpy as np
 
+
 def prepare_dataset():
     
     dataset = pd.read_csv('weather.csv').dropna()
