@@ -118,9 +118,9 @@ def build_decision_tree_model(kf, X, Y, features, tree_parameters):
             
         except ValueError:
             
-            precision = skm.precision_score(Y_test, prediction, average = 'weighted')
+            precision = skm.precision_score(Y_test, prediction, average = 'micro')
     
-            recall = skm.recall_score(Y_test, prediction, average = 'weighted')
+            recall = skm.recall_score(Y_test, prediction, average = 'micro')
 
         accuracies.append(accuracy)
 
