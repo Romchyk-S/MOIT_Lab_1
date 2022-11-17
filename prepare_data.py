@@ -26,4 +26,15 @@ def prepare_dataset():
         
             dataset[dv+"_int"] = dataset[dv] == "Yes"
             
+        else:
+            
+            wind_set = set(dataset[dv])
+            
+            wind_dict_reversed = dict(enumerate(wind_set))
+            
+            wind_dict = {v:k for k,v in wind_dict_reversed.items()}
+            
+            dataset[dv+"_int"] = list(map(lambda x: wind_dict.get(x), dataset[dv]))
+            
+            
     return dataset, continuous_vars, discrete_vars

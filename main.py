@@ -14,12 +14,16 @@ import graphic_interface as gi
 
 print()
 
-corr_threshold = [0.2, 0.6]
+# інтервал кореляції для включення незалежної змінної в модель, відкритий із обох боків
+corr_threshold = [0.2, 0.6] 
 
+# кількість різних поділів масиву даних
 splits_number = 5
 
+# параметри для побудови дерева
 tree_parameters = {'max_depth': 5, 'min_samples_leaf': 2, 'max_leaf_nodes': 10}
 
+# максимальний степінь регресії
 max_regression_pow = 2
 
 

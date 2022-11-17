@@ -40,7 +40,11 @@ def train_evaluate_model(model, X, Y, train, test, ind):
 
     time = tm.perf_counter()-start
 
-    print(f"Цикл {ind}: Час навчання {time}")
+    print(f"Цикл {ind}:")
+    
+    print(f"Час навчання {time}")
+    
+    print()
 
     prediction = model.predict(X_test)
 
@@ -105,10 +109,18 @@ def build_decision_tree_model(kf, X, Y, features, tree_parameters):
         X_test, Y_test, prediction = train_evaluate_model(model, X, Y, train, test, i)
 
         accuracy = skm.accuracy_score(Y_test, prediction)
+        
+        try:
+            
+            precision = skm.precision_score(Y_test, prediction)
 
-        precision = skm.precision_score(Y_test, prediction)
-
-        recall = skm.recall_score(Y_test, prediction)
+            recall = skm.recall_score(Y_test, prediction)
+            
+        except ValueError:
+            
+            precision = skm.precision_score(Y_test, prediction, average = 'weighted')
+    
+            recall = skm.recall_score(Y_test, prediction, average = 'weighted')
 
         accuracies.append(accuracy)
 

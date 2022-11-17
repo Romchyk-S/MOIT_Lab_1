@@ -27,6 +27,8 @@ def main_work(dataset, continuous_vars, discrete_vars, corr_threshold, splits_nu
     end_window(root)    
 
     root.mainloop()
+    
+    
 
 def end_window(root):
 
@@ -36,6 +38,52 @@ def end_window(root):
 
      submit_button = tk.Button(root, text = 'Завершити роботу', command = lambda: button())
      submit_button.pack()
+
+
+def get_independent_vars(dataset, var_to_predict, corr_threshold, var_type):
+    
+    corr = dataset.corr()
+    
+    if var_type == "continuous":
+
+        var_correlation = dict(corr.get(var_to_predict))
+        
+    elif var_type == "discrete":
+        
+        var_correlation = dict(corr.get(var_to_predict+"_int"))
+
+    best_var_correlation = {k: v for k, v in var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
+    
+    
+    while len(best_var_correlation) == 0:
+        
+        corr_threshold[0] -= 0.1
+        
+        corr_threshold[1] += 0.1
+        
+        best_var_correlation = {k: v for k, v in var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
+
+    
+    return best_var_correlation
+
+def prepare_model_parameters(dataset, var_to_predict, corr_threshold, splits_number,  var_type):
+    
+    best_var_correlation = get_independent_vars(dataset, var_to_predict, corr_threshold, var_type)
+    
+    X = dataset[best_var_correlation.keys()].values
+    
+    if var_type == "continuous":
+
+        Y = dataset[var_to_predict].values
+        
+    elif var_type == "discrete":
+        
+        Y = dataset[var_to_predict+"_int"].values        
+    
+    kf = skms.KFold(n_splits = splits_number, shuffle = True)
+    
+
+    return best_var_correlation, X, Y, kf
 
 
 def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_regression_pow, splits_number):
@@ -53,36 +101,21 @@ def choose_continuous_var(root, dataset, continuous_vars, corr_threshold, max_re
 
     def get_cont_var():
 
-        var_to_predict = value_inside.get()
+        cont_var_to_predict = value_inside.get()
 
-        print(f"Обрано змінну {var_to_predict}")
+        print(f"Обрано змінну {cont_var_to_predict}")
+        
 
+        best_cont_var_correlation, X, Y, kf = prepare_model_parameters(dataset, cont_var_to_predict, corr_threshold, splits_number, "continuous")
 
-        corr = dataset.corr()
-
-        var_correlation = dict(corr[var_to_predict])
-
-        best_var_correlation = {k: v for k, v in var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
-
-        print(f"Обрана змінна найкраще корелює зі змінними: {best_var_correlation}")
+        print(f"Обрана змінна найкраще корелює зі змінними: {best_cont_var_correlation}")
 
         print()
-
-
-
-        X = dataset[best_var_correlation.keys()].values
-
-        Y = dataset[var_to_predict].values
-
-
-        kf = skms.KFold(n_splits = splits_number, shuffle = True)
         
-        
-        
+    
         regression_powers = [i for i in range(1, max_regression_pow+1)]
         
         regression_names = {1: "Лінійна регресія", 2: "Квадратурна регресія", 3: "Кубічна регресія"}
-        
         
         
         for rp in regression_powers:
@@ -111,34 +144,25 @@ def choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_num
 
     def get_discr_var():
 
-        binary_var_to_predict = value_inside_1.get()
+        discrete_var_to_predict = value_inside_1.get()
 
-        print(f"Обрано змінну {binary_var_to_predict}")
+        print(f"Обрано змінну {discrete_var_to_predict}")
+        
 
-
-        corr = dataset.corr()
-
-        binary_var_correlation = dict(corr[binary_var_to_predict+"_int"])
-
-        best_binary_var_correlation = {k: v for k, v in binary_var_correlation.items() if abs(v) < corr_threshold[1] and abs(v) > corr_threshold[0]}
-
-        print(f"Обрана змінна найкраще корелює зі змінними: {best_binary_var_correlation}")
+        best_discrete_var_correlation, X, Y, kf = prepare_model_parameters(dataset, discrete_var_to_predict, corr_threshold, splits_number, "discrete")
+        
+        print(f"Обрана змінна найкраще корелює зі змінними: {best_discrete_var_correlation}")
 
         print()
 
 
-        X = dataset[best_binary_var_correlation.keys()].values
-
-        Y = dataset[binary_var_to_predict+"_int"].values
-
-
-        kf = skms.KFold(n_splits = splits_number, shuffle = True)
 
         print("Дерево прийняття рішень")
         
-        bm.build_decision_tree_model(kf, X, Y, list(best_binary_var_correlation), tree_parameters)
+        bm.build_decision_tree_model(kf, X, Y, list(best_discrete_var_correlation), tree_parameters)
         
         
 
     submit_button = tk.Button(root, text='Обрати змінну', command = lambda: get_discr_var())
+    
     submit_button.pack()
