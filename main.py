@@ -4,6 +4,7 @@ Created on Fri Oct 14 11:26:16 2022
 
 @author: romas
 """
+
 import seaborn as sns
 
 import prepare_data as prd
@@ -20,7 +21,9 @@ corr_threshold = [0.2, 0.6]
 splits_number = 5
 
 # параметри для побудови дерева
-tree_parameters = {'max_depth': 5, 'min_samples_leaf': 2, 'max_leaf_nodes': 10}
+tree_parameters = {'max_depth': 5, 'min_samples_leaf': 2, 'max_leaf_nodes': 10, 'random_state': 42}
+
+forest_parameters = {'max_features': 5, 'n_estimators': 10, 'random_state': 42}
 
 dataset_numerical, continuous_vars, discrete_vars = prd.prepare_dataset()
         
@@ -30,4 +33,6 @@ corr.style.background_gradient(cmap = 'coolwarm')
 
 sns.heatmap(corr, annot = False)
 
-gi.main_work(dataset_numerical, continuous_vars, discrete_vars, corr_threshold, splits_number, tree_parameters)
+# нейромережа ніби добре ловить RISK_MM.
+
+gi.main_work(dataset_numerical, continuous_vars, discrete_vars, corr_threshold, splits_number, tree_parameters, forest_parameters)

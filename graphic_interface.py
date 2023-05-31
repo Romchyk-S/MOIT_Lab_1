@@ -18,7 +18,7 @@ import continuous_models as cms
 import discrete_models as dms
 
 
-def main_work(dataset: pd.core.frame.DataFrame, continuous_vars: list[str], discrete_vars: np.ndarray, corr_threshold: list[float], splits_number: int, tree_parameters: dict) -> None:
+def main_work(dataset: pd.core.frame.DataFrame, continuous_vars: list[str], discrete_vars: np.ndarray, corr_threshold: list[float], splits_number: int, tree_parameters: dict, forest_parameters: dict) -> None:
 
     root = ctk.CTk()
 
@@ -32,7 +32,7 @@ def main_work(dataset: pd.core.frame.DataFrame, continuous_vars: list[str], disc
 
     choose_continuous_var(root, dataset, continuous_vars, corr_threshold, splits_number)
 
-    choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_number, tree_parameters)
+    choose_discrete_var(root, dataset, discrete_vars, corr_threshold, splits_number, tree_parameters, forest_parameters)
 
     end_window(root)    
 
@@ -150,7 +150,7 @@ def choose_continuous_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.D
 
     submit_button.pack()
 
-def choose_discrete_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.DataFrame, discrete_vars: np.ndarray, corr_threshold: list[float], splits_number: int, tree_parameters: dict) -> None:
+def choose_discrete_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.DataFrame, discrete_vars: np.ndarray, corr_threshold: list[float], splits_number: int, tree_parameters: dict, forest_parameters: dict) -> None:
 
     label_1 = ctk.CTkLabel(root, text="Оберіть дискретну змінну: ")
 
@@ -177,6 +177,8 @@ def choose_discrete_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.Dat
         print()
         
         dms.build_decision_tree_model(kf, X, Y, list(best_discrete_var_correlation), tree_parameters)
+        
+        dms.build_random_forest_model(kf, X, Y, list(best_discrete_var_correlation) , forest_parameters)
         
 
     submit_button = ctk.CTkButton(root, text='Обрати змінну', command = lambda: get_discr_var())

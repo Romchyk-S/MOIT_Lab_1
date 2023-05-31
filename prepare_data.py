@@ -40,15 +40,5 @@ def prepare_dataset():
             dataset[dv+"_int"] = list(map(lambda x: wind_dict.get(x), dataset[dv]))
             
             dataset = dataset.drop(dv, axis=1)
-            
-    
-    # variables = dataset.columns
-    
-    # print(variables)
-
-    # continuous_vars = [var for var in variables if dataset.dtypes[var] != "object"]
-
-    # discrete_vars = np.setdiff1d(variables, continuous_vars)
-
-            
+        
     return dataset, continuous_vars, discrete_vars
