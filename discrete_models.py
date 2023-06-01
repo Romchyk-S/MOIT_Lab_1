@@ -104,6 +104,13 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
             precision = skm.precision_score(Y_test, prediction, average = 'micro')
     
             recall = skm.recall_score(Y_test, prediction, average = 'micro')
+            
+        
+        confusion_matr = skm.confusion_matrix(Y_test, prediction)
+        
+        print("Confusion matrix:")
+
+        print(confusion_matr)
 
         accuracies.append(accuracy)
 
@@ -123,11 +130,15 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
     print(f"Відкликання/чутливість (recall/sensitivity): {np.mean(recalls)*100}%")
 
     print()
-    
-    # Подумати над способом експортувати у .png.
-    
-    # dot_file = ske.export_graphviz(model, feature_names=features)
 
-    # graph = gphv.Source(dot_file)
-
-    # graph.render(filename="forest", format = "png", cleanup=True)
+    i = 0
+    
+    for tree in model:
+    
+        dot_file = skt.export_graphviz(tree, feature_names=features)
+    
+        graph = gphv.Source(dot_file)
+    
+        graph.render(filename=f"forest_{i}", format = "png", cleanup=True)
+        
+        i += 1

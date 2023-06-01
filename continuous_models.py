@@ -17,15 +17,9 @@ import sklearn.model_selection as skms
 
 import tensorflow.keras.models as tkm
 
-# import tensorflow.keras.preprocessing as tkp
-
-# import tensorflow.keras.utils as tku
-
 import tensorflow.keras.layers as tkl
 
-# import tensorflow.keras.losses as tklosses
-
-# import tensorflow.python.data as tpd
+import matplotlib.pyplot as plt
 
 import model_training as mt
 
@@ -57,8 +51,6 @@ def build_regression_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray, 
         
         i += 1
 
-    # print(model.coef_)
-
     print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
 
     print(f"Середня похибка за {kf.n_splits} поділів: {round(np.mean(errs), 3)}")
@@ -71,7 +63,7 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
     
     i = 0
     
-    scores, errs_test, errs_pred = [], [], []
+    scores, errs_test = [], []
     
     poly = skp.PolynomialFeatures(degree = 1, include_bias = False)
 
@@ -85,7 +77,9 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
     
         model = tkm.Sequential()
         
-        model.add(tkl.Dense(64, activation='relu'))
+        model.add(tkl.Dense(len(X), activation='relu'))
+        
+        model.add(tkl.Dense(64, activation='tanh'))
         
         model.add(tkl.Dense(32, activation='tanh'))
         
@@ -98,28 +92,45 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
         model.add(tkl.Dense(1))
         
         model.compile(loss = "mse", metrics=['accuracy'])
+        
+        # крива навчання для кожної мережі.
+        
 
         X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
 
         model_performance = model.evaluate(X_test, Y_test)
+        
+        errors = {round(float(k), 5):round(float(v), 5) for k, v in zip(Y_test, prediction) if k != v}
+        
+        print("Невідповідності в елементах між y_test та prediction")
+        
+        print(errors)
+        
+        print(f"Відсотків невідповідних: {len(errors)/len(prediction)*100}%")
 
-        error = skm.mean_squared_error(Y_test, prediction)
-    
         scores.append(model_performance[1])
         
         errs_test.append(model_performance[0])
-
-        errs_pred.append(error)
         
         print()
         
         i += 1
+        
+    plt.plot(list(range(1, kf.n_splits+1)), errs_test)
+    
+    plt.title("Loss MSE for NN.")
+    
+    plt.show()
+    
+    plt.plot(list(range(1, kf.n_splits+1)), scores)
+    
+    plt.title("Accuracy for NN.")
+    
+    plt.show()
 
     print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
     
     print(f"Середня похибка за {kf.n_splits} поділів (x_test vs y_test): {round(np.mean(errs_test), 3)}")
-
-    print(f"Середня похибка за {kf.n_splits} поділів (y_test vs prediction): {round(np.mean(errs_pred), 3)}")
 
     print()
     

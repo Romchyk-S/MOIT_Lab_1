@@ -7,6 +7,8 @@ Created on Fri Oct 14 11:26:16 2022
 
 import seaborn as sns
 
+import matplotlib.pyplot as plt
+
 import prepare_data as prd
 
 import graphic_interface as gi
@@ -33,6 +35,6 @@ corr.style.background_gradient(cmap = 'coolwarm')
 
 sns.heatmap(corr, annot = False)
 
-# нейромережа ніби добре ловить RISK_MM.
+plt.show()
 
 gi.main_work(dataset_numerical, continuous_vars, discrete_vars, corr_threshold, splits_number, tree_parameters, forest_parameters)

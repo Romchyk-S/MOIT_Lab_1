@@ -94,8 +94,6 @@ def prepare_model_parameters(dataset: pd.core.frame.DataFrame, var_to_predict: s
 
 def choose_continuous_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.DataFrame, continuous_vars: list[str], corr_threshold: list[float], splits_number: int) -> None:
 
-    # print(dataset.columns)
-
     label = ctk.CTkLabel(root, text = "Оберіть максимальний степінь регресії: ")
 
     label.pack()
