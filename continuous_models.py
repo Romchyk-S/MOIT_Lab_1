@@ -73,7 +73,9 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
     
     Y = np.interp(Y, (Y.min(), Y.max()), (0, +1))
     
-    for train, test in kf.split(X):     
+    for num, train_test in enumerate(kf.split(X)):
+        
+        train, test = train_test
     
         model = tkm.Sequential()
         
@@ -92,10 +94,10 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
         model.add(tkl.Dense(1))
         
         model.compile(loss = "mse", metrics=['accuracy'])
-        
-        # крива навчання для кожної мережі.
-        
 
+        
+        plt.title(f"Мережа {num}")
+    
         X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
 
         model_performance = model.evaluate(X_test, Y_test)
@@ -115,19 +117,7 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
         print()
         
         i += 1
-        
-    plt.plot(list(range(1, kf.n_splits+1)), errs_test)
     
-    plt.title("Loss MSE for NN.")
-    
-    plt.show()
-    
-    plt.plot(list(range(1, kf.n_splits+1)), scores)
-    
-    plt.title("Accuracy for NN.")
-    
-    plt.show()
-
     print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
     
     print(f"Середня похибка за {kf.n_splits} поділів (x_test vs y_test): {round(np.mean(errs_test), 3)}")
