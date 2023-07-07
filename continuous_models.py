@@ -13,6 +13,8 @@ import sklearn.preprocessing as skp
 
 import sklearn.linear_model as sklm
 
+import sklearn.compose as skcomp
+
 import sklearn.model_selection as skms
 
 import tensorflow.keras.models as tkm
@@ -31,37 +33,33 @@ def build_regression_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray, 
 
     X = poly.fit_transform(X)
 
-    scores, errs = [], []
+    errs = []
     
-    i = 0
-
-    for train, test in kf.split(X):
+    for num, data in enumerate(kf.split(X)):
+        
+        train, test = data
 
         model = sklm.LinearRegression()
+        
+        # model = skcomp.TransformedTargetRegressor(regressor=model, func=np.log, inverse_func=np.exp)
 
-        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
-
-        model_performance = model.score(X_test, Y_test)
-
+        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, num)
+        
         error = skm.mean_squared_error(Y_test, prediction)
-
-        scores.append(model_performance)
 
         errs.append(error)
         
-        i += 1
-
-    print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
+        print(f"Похибка {error}")
+        
+        print()
 
     print(f"Середня похибка за {kf.n_splits} поділів: {round(np.mean(errs), 3)}")
 
     print()
 
-def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) -> None:
+def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray, epochs: int) -> None:
     
     print("Нейронна мережа")
-    
-    i = 0
     
     scores, errs_test = [], []
     
@@ -79,17 +77,11 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
     
         model = tkm.Sequential()
         
-        model.add(tkl.Dense(len(X), activation='relu'))
+        model.add(tkl.Dense(len(X), activation='softplus'))
         
-        model.add(tkl.Dense(64, activation='tanh'))
+        model.add(tkl.Dense(8, activation='softplus'))
         
-        model.add(tkl.Dense(32, activation='tanh'))
-        
-        model.add(tkl.Dense(16, activation='tanh'))
-        
-        model.add(tkl.Dense(8, activation='tanh'))
-        
-        model.add(tkl.Dense(4, activation='relu'))
+        model.add(tkl.Dense(4, activation='softplus'))
         
         model.add(tkl.Dense(1))
         
@@ -98,11 +90,15 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
         
         plt.title(f"Мережа {num}")
     
-        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
+        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, num, epochs = epochs)
+
+        print(len(X_test))
 
         model_performance = model.evaluate(X_test, Y_test)
         
         errors = {round(float(k), 5):round(float(v), 5) for k, v in zip(Y_test, prediction) if k != v}
+        
+        print()
         
         print("Невідповідності в елементах між y_test та prediction")
         
@@ -115,8 +111,6 @@ def build_neural_network(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarray) ->
         errs_test.append(model_performance[0])
         
         print()
-        
-        i += 1
     
     print(f"Середня точність за {kf.n_splits} поділів: {round(np.mean(scores), 3)*100}%")
     

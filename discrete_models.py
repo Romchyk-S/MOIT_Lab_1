@@ -7,6 +7,10 @@ Created on Fri May 19 12:58:50 2023
 
 import numpy as np
 
+import seaborn as sns
+
+import matplotlib.pyplot as plt
+
 import sklearn.metrics as skm
 
 import sklearn.ensemble as ske
@@ -30,14 +34,14 @@ def build_decision_tree_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
     # param_grid = {"max_depth": [5, 15, 25], "min_samples_leaf": [1, 3], "max_leaf_nodes": [10, 20, 35, 50]}
 
     accuracies, precisions, recalls = [], [], []
-    
-    i = 0
 
-    for train, test in kf.split(X):    
+    for num, data in enumerate(kf.split(X)):   
+        
+        train, test = data
 
         model = skt.DecisionTreeClassifier(max_depth=tree_parameters.get('max_depth', 5), min_samples_leaf=tree_parameters.get('min_samples_leaf', 2), max_leaf_nodes=tree_parameters.get('max_leaf_nodes', 10), random_state = tree_parameters.get('random_state', 666))
 
-        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
+        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, num)
 
         accuracy = skm.accuracy_score(Y_test, prediction)
         
@@ -52,14 +56,24 @@ def build_decision_tree_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
             precision = skm.precision_score(Y_test, prediction, average = 'micro')
     
             recall = skm.recall_score(Y_test, prediction, average = 'micro')
+            
+        confusion_matr = skm.confusion_matrix(Y_test, prediction)
+
+        sns.heatmap(confusion_matr,annot=True,fmt="d", center=0, cmap='coolwarm') 
+        
+        plt.title(f"Confusion Matrix for Decision Tree {num}")
+        
+        plt.ylabel("True label")
+        
+        plt.xlabel("Predicted label")
+        
+        plt.show()
 
         accuracies.append(accuracy)
 
         precisions.append(precision)
 
         recalls.append(recall)
-        
-        i += 1
 
     print()
     
@@ -83,13 +97,13 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
     
     accuracies, precisions, recalls = [], [], []
     
-    i = 0
-    
-    for train, test in kf.split(X): 
+    for num, data in enumerate(kf.split(X)): 
+        
+        train, test = data
         
         model = ske.RandomForestClassifier(max_features = forest_parameters.get('max_features', 5), n_estimators = forest_parameters.get('n_estimators', 10), random_state = forest_parameters.get('random_state', 666))
 
-        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, i)
+        X_test, Y_test, prediction = mt.train_evaluate_model(model, X, Y, train, test, num)
 
         accuracy = skm.accuracy_score(Y_test, prediction)
         
@@ -107,10 +121,16 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
             
         
         confusion_matr = skm.confusion_matrix(Y_test, prediction)
-        
-        print("Confusion matrix:")
 
-        print(confusion_matr)
+        sns.heatmap(confusion_matr,annot=True,fmt="d", center=0, cmap='autumn') 
+        
+        plt.title(f"Confusion Matrix for RF {num}")
+        
+        plt.ylabel("True label")
+        
+        plt.xlabel("Predicted label")
+        
+        plt.show()
 
         accuracies.append(accuracy)
 
@@ -118,8 +138,6 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
 
         recalls.append(recall)
         
-        i += 1
-
     
     print()
     
@@ -131,14 +149,10 @@ def build_random_forest_model(kf: skms._split.KFold, X: np.ndarray, Y: np.ndarra
 
     print()
 
-    i = 0
-    
-    for tree in model:
+    for num, tree in enumerate(model):
     
         dot_file = skt.export_graphviz(tree, feature_names=features)
     
         graph = gphv.Source(dot_file)
     
-        graph.render(filename=f"forest_{i}", format = "png", cleanup=True)
-        
-        i += 1
+        graph.render(filename=f"forest_{num}", format = "png", cleanup=True)

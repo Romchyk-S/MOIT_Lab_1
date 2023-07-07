@@ -104,24 +104,37 @@ def choose_continuous_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.D
     
     textbox.pack()
     
-
-    label_1 = ctk.CTkLabel(root, text = "Оберіть неперервну змінну: ")
+    
+    label_1 = ctk.CTkLabel(root, text = "Оберіть кількість епох навчання нейромережі: ")
 
     label_1.pack()
 
-    value_inside_1 = ctk.StringVar()
+    value_inside_1 = ctk.IntVar(value = 10)
+    
+    textbox_1 = ctk.CTkEntry(root, textvariable = value_inside_1)
+    
+    textbox_1.pack()
+    
+    
 
-    menu = ctk.CTkOptionMenu(root, variable = value_inside_1, values = continuous_vars)
+    label_2 = ctk.CTkLabel(root, text = "Оберіть неперервну змінну: ")
+
+    label_2.pack()
+
+    value_inside_2 = ctk.StringVar()
+
+    menu = ctk.CTkOptionMenu(root, variable = value_inside_2, values = continuous_vars)
 
     menu.pack()
 
 
     def get_cont_var():
         
-        max_regression_pow = value_inside.get()
+        max_regression_pow = int(value_inside.get())
         
-
-        cont_var_to_predict = value_inside_1.get()
+        epochs = int(value_inside_1.get())
+    
+        cont_var_to_predict = value_inside_2.get()
 
         print(f"Обрано змінну {cont_var_to_predict}")
 
@@ -141,7 +154,7 @@ def choose_continuous_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.D
 
             cms.build_regression_model(kf, X, Y, rp)
             
-        cms.build_neural_network(kf, X, Y)
+        cms.build_neural_network(kf, X, Y, epochs)
 
 
     submit_button = ctk.CTkButton(root, text='Обрати змінну', command = lambda: get_cont_var())
@@ -150,20 +163,20 @@ def choose_continuous_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.D
 
 def choose_discrete_var(root: ctk.windows.ctk_tk.CTk, dataset: pd.core.frame.DataFrame, discrete_vars: np.ndarray, corr_threshold: list[float], splits_number: int, tree_parameters: dict, forest_parameters: dict) -> None:
 
-    label_1 = ctk.CTkLabel(root, text="Оберіть дискретну змінну: ")
+    label = ctk.CTkLabel(root, text="Оберіть дискретну змінну: ")
 
-    label_1.pack()
+    label.pack()
 
-    value_inside_1 = ctk.StringVar()
+    value_inside = ctk.StringVar()
 
-    cond_entry_1 = ctk.CTkOptionMenu(root, variable = value_inside_1, values = discrete_vars)
+    cond_entry = ctk.CTkOptionMenu(root, variable = value_inside, values = discrete_vars)
 
-    cond_entry_1.pack()
+    cond_entry.pack()
 
 
     def get_discr_var():
 
-        discrete_var_to_predict = value_inside_1.get()
+        discrete_var_to_predict = value_inside.get()
 
         print(f"Обрано змінну {discrete_var_to_predict}")
         
