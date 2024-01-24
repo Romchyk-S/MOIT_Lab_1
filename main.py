@@ -14,6 +14,8 @@ import prepare_data as prd
 import graphic_interface as gi
 
 
+# make normal confusion matrix labels
+
 print()
 
 # інтервал кореляції для включення незалежної змінної в модель, відкритий із обох боків
